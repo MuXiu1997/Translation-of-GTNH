@@ -1,0 +1,115 @@
+name: Nightly Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 中国时间每天凌晨 2 点
+    - cron: '0 18 * * *'
+
+env:
+  PARATRANZ_TOKEN: ${{ secrets.PARATRANZ_TOKEN }}
+  PARATRANZ_PROJECT_ID: 4964
+  GIT_AUTHOR: MuXiu1997 <muxiu1997@muxiu1997.com>
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REPO_PATH: .repo
+  ASSETS_PATH: .assets
+  PARATRANZ_CACHE_DIR: .paratranz-cache
+
+jobs:
+  nightly-build:
+    name: Nightly Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout MuXiu1997/GTNH-translation-compare
+        uses: actions/checkout@v6
+        with:
+          repository: MuXiu1997/GTNH-translation-compare
+          ref: next
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          path: ${{ env.REPO_PATH }}
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: '^2'
+          cache: true
+          cache-hash: 'nightly-build'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Cache ParaTranz
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PARATRANZ_CACHE_DIR }}
+          key: paratranz-cache-${{ github.run_id }}
+          restore-keys: |
+            paratranz-cache-
+
+      - name: Setup Datetime Related Envs
+        run: deno run -A --no-config ${{ env.REPO_PATH }}/.github/scripts/setup-nightly-build-datetime-envs.ts
+
+      - name: ParaTranz To Quest Book
+        run: >-
+          bun run index.ts from-paratranz:quest-book
+          --repo='${{ env.REPO_PATH }}'
+      - name: ParaTranz To Lang And zs
+        run: >-
+          bun run index.ts from-paratranz:lang-zs
+          --repo='${{ env.REPO_PATH }}'
+      - name: ParaTranz To GT Lang
+        run: >-
+          bun run index.ts from-paratranz:gt-lang
+          --repo='${{ env.REPO_PATH }}'
+
+      - name: Build Nightly Assets
+        env:
+          IS_NIGHTLY_BUILD: 'true'
+          ARCHIVE_NAME: nightly-${{ env.NB_LOCAL_DATE }}.7z
+        run: deno run -A --no-config ${{ env.REPO_PATH }}/.github/scripts/release.ts
+
+      - name: Push tag
+        working-directory: ${{ env.REPO_PATH }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git checkout --orphan temp
+          git reset HEAD -- .
+          git commit --allow-empty -m "Nightly Build ${{ env.NB_LOCAL_DATE }} ${{ env.NB_LOCAL_TIME }}"
+          git tag ${{ env.NB_TAG }}
+          git push --delete origin ${{ env.NB_TAG }} || true
+          git push origin ${{ env.NB_TAG }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.NB_TAG }}
+          name: 每日构建 - ${{ env.NB_LOCAL_DATE }}
+          body: |
+            请阅读主页ReadMe以获知详细用法
+
+            自动构建于 ${{ env.NB_LOCAL_DATE }} ${{ env.NB_LOCAL_TIME }}
+          files: ${{ env.ASSETS_PATH }}/*
+
+  cleanup-outdated-nightly-builds:
+    name: Cleanup Outdated Nightly Builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/scripts
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: '^2'
+          cache: true
+          cache-hash: 'cleanup-nightly'
+
+      - name: Setup Datetime Related Envs
+        run: deno run -A --no-config .github/scripts/setup-nightly-build-datetime-envs.ts
+
+      - name: Cleanup Outdated Nightly Builds
+        run: deno run -A --no-config .github/scripts/cleanup-nightly-builds.ts
