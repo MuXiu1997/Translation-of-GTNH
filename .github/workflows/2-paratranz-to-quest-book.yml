@@ -2,15 +2,15 @@ name: 2. Paratranz To Quest Book
 
 on:
   issues:
-    types: [ opened ]
+    types: [opened]
 
 env:
   PARATRANZ_TOKEN: ${{ secrets.PARATRANZ_TOKEN }}
-  PARATRANZ_PROJECT_ID: ${{ secrets.PARATRANZ_PROJECT_ID }}
+  PARATRANZ_PROJECT_ID: 4964
 
   VALID_LABEL: 自动化:paratranz→questbook
   VALID_USER: ${{ github.repository_owner }}
-  
+
   REPO_PATH: .repo.local.d
 
   CO_AUTHORED_BY: |
