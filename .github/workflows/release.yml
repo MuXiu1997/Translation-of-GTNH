@@ -20,7 +20,7 @@ jobs:
           path: ${{ env.REPO_PATH }}
 
       - name: Build Release Assets
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: release.ts
         env:

@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Run Script
         id: check-and-parse-issue
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: parse-issue.ts
           args: quest-book-to-paratranz
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Compare Repo
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-compare-repo@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-compare-repo@master
 
       - name: Setup Bun
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-bun@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-bun@master
 
       - name: Run Script
         run: >-

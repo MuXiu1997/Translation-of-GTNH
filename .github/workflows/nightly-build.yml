@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Compare Repo
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-compare-repo@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-compare-repo@master
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -29,10 +29,10 @@ jobs:
           path: ${{ env.REPO_PATH }}
 
       - name: Setup Bun
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-bun@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-bun@master
 
       - name: Setup Datetime Related Envs
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: setup-nightly-build-datetime-envs.ts
 
@@ -50,7 +50,7 @@ jobs:
           --repo-path='${{ env.REPO_PATH }}'
 
       - name: Build Nightly Assets
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: release.ts
         env:
@@ -84,11 +84,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Datetime Related Envs
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: setup-nightly-build-datetime-envs.ts
 
       - name: Cleanup Outdated Nightly Builds
-        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
+        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: cleanup-nightly-builds.ts

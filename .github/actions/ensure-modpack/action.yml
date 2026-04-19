@@ -61,7 +61,7 @@ runs:
 
     - name: Setup Bun
       if: steps.check-bun.outputs.exists != 'true'
-      uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-bun@master
+      uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-bun@master
 
     - name: Restore Modpack Cache
       id: cache
