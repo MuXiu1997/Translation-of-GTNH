@@ -67,6 +67,52 @@ jobs:
           artifact-name: ${{ needs.check-and-parse-issue.outputs.modpack-artifact-name }}
           root: ${{ env.MODPACK_PATH }}
 
+      - name: Inspect Modpack Structure
+        run: |
+          MODPACK_DIR='${{ env.MODPACK_PATH }}'
+          echo "============================================================"
+          echo "解压后的 modpack 根目录: $MODPACK_DIR"
+          echo "============================================================"
+          echo
+          echo "---------- 总大小 ----------"
+          du -sh "$MODPACK_DIR" 2>/dev/null || echo "(无法计算大小)"
+          echo
+          echo "---------- 顶层目录结构 ----------"
+          ls -lah "$MODPACK_DIR"
+          echo
+          echo "---------- 关键子目录是否存在 ----------"
+          for sub in mods scripts config resources resourcepacks coremods lang; do
+            if [ -e "$MODPACK_DIR/$sub" ]; then
+              count=$(find "$MODPACK_DIR/$sub" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+              size=$(du -sh "$MODPACK_DIR/$sub" 2>/dev/null | cut -f1)
+              echo "  [✓] $sub  (条目: $count, 大小: $size)"
+            else
+              echo "  [✗] $sub  (不存在)"
+            fi
+          done
+          echo
+          echo "---------- mods 目录前 20 个 jar ----------"
+          if [ -d "$MODPACK_DIR/mods" ]; then
+            find "$MODPACK_DIR/mods" -maxdepth 1 -name "*.jar" -printf "%f\n" 2>/dev/null \
+              | sort | head -20
+            total_jars=$(find "$MODPACK_DIR/mods" -maxdepth 1 -name "*.jar" 2>/dev/null | wc -l | tr -d ' ')
+            echo "  ...(共 $total_jars 个 jar)"
+          else
+            echo "  (mods 目录不存在)"
+          fi
+          echo
+          echo "---------- scripts 目录前 10 个 zs ----------"
+          if [ -d "$MODPACK_DIR/scripts" ]; then
+            find "$MODPACK_DIR/scripts" -name "*.zs" 2>/dev/null | head -10
+            total_zs=$(find "$MODPACK_DIR/scripts" -name "*.zs" 2>/dev/null | wc -l | tr -d ' ')
+            echo "  ...(共 $total_zs 个 zs)"
+          else
+            echo "  (scripts 目录不存在)"
+          fi
+          echo
+          echo "---------- 是否含 lang 文件 (顶层 5 层内最多 10 条) ----------"
+          find "$MODPACK_DIR" -maxdepth 5 -name "*.lang" 2>/dev/null | head -10 || echo "  (未找到 .lang 文件)"
+
       - name: Run Script
         if: false # TEMP(test): skip ParaTranz sync while testing ensure-modpack
         run: >-
