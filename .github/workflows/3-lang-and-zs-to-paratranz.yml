@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Run Script
         id: check-and-parse-issue
-        uses: MuXiu1997/Translation-of-GTNH/.github/actions/run-script@master
+        uses: Kiwi233/Translation-of-GTNH/.github/actions/run-script@master
         with:
           script: parse-issue.ts
           args: lang-and-zs-to-paratranz
@@ -54,13 +54,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Compare Repo
-        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-compare-repo@master
+        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-compare-repo@master
 
       - name: Setup Bun
-        uses: MuXiu1997/Translation-of-GTNH/.github/actions/setup-bun@master
+        uses: Kiwi233/Translation-of-GTNH/.github/actions/setup-bun@master
 
       - name: Ensure Modpack
-        uses: MuXiu1997/Translation-of-GTNH/.github/actions/ensure-modpack@master
+        uses: Kiwi233/Translation-of-GTNH/.github/actions/ensure-modpack@master
         with:
           url: ${{ needs.check-and-parse-issue.outputs.modpack-url }}
           run-url: ${{ needs.check-and-parse-issue.outputs.modpack-run-url }}
@@ -68,11 +68,13 @@ jobs:
           root: ${{ env.MODPACK_PATH }}
 
       - name: Run Script
+        if: false # TEMP(test): skip ParaTranz sync while testing ensure-modpack
         run: >-
           bun run src/index.ts to-paratranz:lang-zs
           --modpack-path='${{ env.MODPACK_PATH }}'
 
       - name: Close Issue
+        if: false # TEMP(test): skip auto-close while testing ensure-modpack
         uses: peter-evans/close-issue@v2.0.0
         with:
           comment: |
